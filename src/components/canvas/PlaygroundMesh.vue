@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRenderLoop } from '@tresjs/core'
 import { ShaderMaterial, DoubleSide, Color, Vector2 } from 'three'
-import { shallowRef, watch, ref, onMounted, onUnmounted } from 'vue'
+import { shallowRef, watch, ref, onMounted, onUnmounted, computed } from 'vue'
 import { useAppStore } from '@/stores/appState'
 import gsap from 'gsap'
 
@@ -12,10 +12,11 @@ const props = defineProps<{
   mouse: { x: number, y: number }
 }>()
 
+const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
+
 // Interaction State
 const isHolding = ref(false)
 const holdProgress = ref(0)
-let holdTimer: any = null
 const bursts = ref<any[]>([])
 
 const startHold = () => {
@@ -70,6 +71,7 @@ const fragmentShader = `
   uniform vec2 uMouse;
   uniform float uHoldProgress;
   uniform float uPlaygroundMode;
+  uniform bool uIsMobile;
   
     struct Burst {
       vec2 pos;
@@ -114,16 +116,22 @@ const fragmentShader = `
       vec3 finalColor = vec3(0.0);
       float finalAlpha = 0.0;
       
+      float mobileScale = uIsMobile ? 0.7 : 1.0;
+      
       // 1. Hold Build-up Effect (Intricate Gathering)
       float dMouse = distance(vUv, uMouse);
       if (uHoldProgress > 0.01) {
         // Intricate gathering with FBM
-        float n = fbm(vUv * 20.0 + uTime * 2.0);
-        float core = smoothstep(0.12 * uHoldProgress, 0.0, dMouse);
+        float n = fbm(vUv * (uIsMobile ? 15.0 : 20.0) + uTime * 2.0);
+        float coreRadius = 0.12 * uHoldProgress * mobileScale;
+        float core = smoothstep(coreRadius, 0.0, dMouse);
         float pulse = sin(uTime * 20.0) * 0.02 * uHoldProgress;
         
-        float ring = smoothstep(0.15 * uHoldProgress + pulse + n * 0.05, 0.14 * uHoldProgress + pulse, dMouse) * 
-                     smoothstep(0.10 * uHoldProgress, 0.11 * uHoldProgress + n * 0.05, dMouse);
+        float outerRadius = 0.15 * uHoldProgress * mobileScale + pulse + n * 0.05;
+        float innerRadius = 0.10 * uHoldProgress * mobileScale;
+        
+        float ring = smoothstep(outerRadius, outerRadius - 0.01, dMouse) * 
+                     smoothstep(innerRadius, innerRadius + 0.01 + n * 0.05, dMouse);
         
         vec3 gatherCol = mix(vec3(0.05, 0.2, 0.15), vec3(0.3, 0.1, 0.2), n);
         finalColor += gatherCol * (core + ring * 2.0) * uHoldProgress;
@@ -137,11 +145,11 @@ const fragmentShader = `
         float age = uTime - uBursts[i].startTime;
         if (age > 8.0) continue;
         
-        float radius = age * 0.5;
+        float radius = age * (uIsMobile ? 0.35 : 0.5);
         float dist = distance(vUv, uBursts[i].pos);
         
         // Organic bleeding edge with FBM
-        float n = fbm(vUv * 12.0 - age * 0.5) * 0.2;
+        float n = fbm(vUv * (uIsMobile ? 8.0 : 12.0) - age * 0.5) * 0.2;
         float inkEdge = smoothstep(radius + n, radius - 0.15 - n, dist);
         
         // Viscous bleeding
@@ -166,7 +174,6 @@ const fragmentShader = `
       
       gl_FragColor = vec4(finalColor, finalAlpha * uPlaygroundMode);
     }
-
 `
 
 const uniforms = {
@@ -174,6 +181,7 @@ const uniforms = {
   uMouse: { value: new Vector2(0.5, 0.5) },
   uHoldProgress: { value: 0 },
   uPlaygroundMode: { value: 0 },
+  uIsMobile: { value: isMobile.value },
   uBurstCount: { value: 0 },
   uBursts: { 
     value: Array(10).fill(0).map(() => ({

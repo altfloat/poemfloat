@@ -150,38 +150,38 @@ watch(() => appStore.introStep, (step) => {
     targetTurbulence = 0.25
     targetFogDensity = 0.08
     targetFogColor = '#030303'
-    } else if (step === 7) {
-      targetColors = colors.elegant
-      targetTurbulence = 0.05
-      targetFogDensity = 0.008
-      targetFogColor = '#fdfaf6'
-      
-        // THE BIG "BADUMP" - Impact Visuals
-        const badumpTl = gsap.timeline()
+      } else if (step === 7) {
+        targetColors = colors.elegant
+        targetTurbulence = 0.05
+        targetFogDensity = 0.008
+        targetFogColor = '#fdfaf6'
         
-        // 1. First Pulse (Mini)
-        badumpTl.to(u.uBrightness, { value: 2.5, duration: 0.05, ease: 'power2.out' })
-        badumpTl.to(u.uTurbulence, { value: 1.5, duration: 0.05, ease: 'power2.out' }, 0)
-        
-        // 2. Second Pulse (The Main Thump)
-        badumpTl.to(u.uBrightness, { value: 4.5, duration: 0.08, ease: 'expo.out' }, 0.12)
-        badumpTl.to(u.uTurbulence, { value: 3.5, duration: 0.08, ease: 'expo.out' }, 0.12)
-        
-        // 3. Settle
-        badumpTl.to(u.uBrightness, { value: 1.0, duration: 1.5, ease: 'power3.out' }, 0.25)
-        badumpTl.to(u.uTurbulence, { value: 0.05, duration: 1.5, ease: 'power3.out' }, 0.25)
-  
-        // 4. Badump Shake (Double Kick)
-        const shakeTl = gsap.timeline()
-        // Kick 1
-        shakeTl.to(sceneGroup.value.position, { x: 0.2, y: -0.1, duration: 0.05, ease: 'power4.out' })
-        shakeTl.to(sceneGroup.value.position, { x: 0, y: 0, duration: 0.1, ease: 'elastic.out(1, 0.3)' })
-        // Kick 2 (Harder)
-        shakeTl.to(sceneGroup.value.position, { x: -0.4, y: 0.3, duration: 0.05, ease: 'power4.out' }, 0.15)
-        shakeTl.to(sceneGroup.value.position, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.2)' }, 0.2)
-        
-        triggerExplosion()
-    } else if (step >= 8) {
+          // THE BIG "BADUMP" - Impact Visuals
+          const badumpTl = gsap.timeline({ delay: 0.1 })
+          
+          // 1. First Pulse (Mini) - Slightly slowed
+          badumpTl.to(u.uBrightness, { value: 2.0, duration: 0.15, ease: 'sine.out' })
+          badumpTl.to(u.uTurbulence, { value: 1.2, duration: 0.15, ease: 'sine.out' }, 0)
+          
+          // 2. Second Pulse (The Main Thump) - More deliberate
+          badumpTl.to(u.uBrightness, { value: 3.5, duration: 0.25, ease: 'expo.out' }, 0.2)
+          badumpTl.to(u.uTurbulence, { value: 2.8, duration: 0.25, ease: 'expo.out' }, 0.2)
+          
+          // 3. Settle
+          badumpTl.to(u.uBrightness, { value: 1.0, duration: 2.5, ease: 'power2.out' }, 0.5)
+          badumpTl.to(u.uTurbulence, { value: 0.05, duration: 2.5, ease: 'power2.out' }, 0.5)
+    
+          // 4. Badump Shake (Double Kick)
+          const shakeTl = gsap.timeline({ delay: 0.2 })
+          // Kick 1
+          shakeTl.to(sceneGroup.value.position, { x: 0.1, y: -0.05, duration: 0.1, ease: 'power2.out' })
+          shakeTl.to(sceneGroup.value.position, { x: 0, y: 0, duration: 0.2, ease: 'elastic.out(1, 0.3)' })
+          // Kick 2 (Harder)
+          shakeTl.to(sceneGroup.value.position, { x: -0.2, y: 0.15, duration: 0.1, ease: 'power2.out' }, 0.3)
+          shakeTl.to(sceneGroup.value.position, { x: 0, y: 0, duration: 1.2, ease: 'elastic.out(1, 0.2)' }, 0.4)
+          
+          triggerExplosion()
+      } else if (step >= 8) {
 
     targetColors = colors.elegant
     targetTurbulence = 0.08
@@ -198,7 +198,7 @@ watch(() => appStore.introStep, (step) => {
       })
     }
 
-      const transitionDuration = step === 7 ? 0.7 : 2.0
+      const transitionDuration = step === 7 ? 1.2 : 2.0
 
     animateColor(u.uColorA, targetColors[0], transitionDuration)
     animateColor(u.uColorB, targetColors[1], transitionDuration)
@@ -217,8 +217,10 @@ watch(() => appStore.introStep, (step) => {
     }
 })
 
+const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
+
 // Particle System Logic
-const particleCount = 4000
+const particleCount = isMobile.value ? 1500 : 4000
 const particlePositions = new Float32Array(particleCount * 3)
 const particleVelocities = new Float32Array(particleCount * 3)
 
@@ -242,14 +244,15 @@ function triggerExplosion() {
   
   if (pointsRef.value) {
     const positions = pointsRef.value.geometry.attributes.position.array
+    const scatterRange = isMobile.value ? 10 : 15
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 15
+      positions[i * 3] = (Math.random() - 0.5) * scatterRange
       positions[i * 3 + 1] = (Math.random() - 0.5) * 3
       positions[i * 3 + 2] = (Math.random() - 0.5) * 2
       
       const angle = Math.random() * Math.PI * 2
       const upAngle = Math.random() * Math.PI * 0.3
-      const speed = 0.003 + Math.random() * 0.02
+      const speed = isMobile.value ? (0.002 + Math.random() * 0.015) : (0.003 + Math.random() * 0.02)
       
       particleVelocities[i * 3] = Math.cos(angle) * Math.sin(upAngle) * speed
       particleVelocities[i * 3 + 1] = Math.cos(upAngle) * speed + 0.005
@@ -328,23 +331,23 @@ const showParticles = computed(() => appStore.introStep >= 7)
 
     <PlaygroundMesh :mouse="{ x: x / (typeof window !== 'undefined' ? window.innerWidth : 1), y: 1.0 - (y / (typeof window !== 'undefined' ? window.innerHeight : 1)) }" />
 
-    <TresPoints v-if="showParticles" ref="pointsRef">
-      <TresBufferGeometry>
-        <TresBufferAttribute
-          name="position"
-          :args="[particlePositions, 3]"
+      <TresPoints v-if="showParticles" ref="pointsRef">
+        <TresBufferGeometry>
+          <TresBufferAttribute
+            name="position"
+            :args="[particlePositions, 3]"
+          />
+        </TresBufferGeometry>
+        <TresPointsMaterial 
+          :size="isMobile ? 0.04 : 0.08" 
+          :transparent="true" 
+          :opacity="0" 
+          color="#3d5a3a" 
+          :depth-write="false"
+          :blending="2"
+          :size-attenuation="true"
         />
-      </TresBufferGeometry>
-      <TresPointsMaterial 
-        :size="0.08" 
-        :transparent="true" 
-        :opacity="0" 
-        color="#3d5a3a" 
-        :depth-write="false"
-        :blending="2"
-        :size-attenuation="true"
-      />
-    </TresPoints>
+      </TresPoints>
 
     <GalleryScene v-if="showGallery" />
   </TresGroup>

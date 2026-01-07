@@ -25,9 +25,9 @@ defineEmits<{
 
 <style lang="scss" scoped>
 .poem-miniature {
-  flex: 0 0 300px;
-  height: 400px;
-  margin: 0 2rem;
+  flex: 0 0 clamp(260px, 80vw, 300px);
+  height: clamp(350px, 60vh, 400px);
+  margin: 0 1rem;
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -39,8 +39,13 @@ defineEmits<{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
+
+  @media (min-width: 768px) {
+    margin: 0 2rem;
+    padding: 2rem;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -67,8 +72,8 @@ defineEmits<{
   }
 
   .poem-symbol {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: clamp(2rem, 8vw, 2.5rem);
+    margin-bottom: 0.8rem;
     color: #1a1a1a;
     opacity: 0.5;
     transition: all 0.6s ease;
@@ -76,9 +81,9 @@ defineEmits<{
 
   .poem-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.6rem;
+    font-size: clamp(1.3rem, 6vw, 1.6rem);
     font-weight: 300;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     color: #1a1a1a;
     letter-spacing: 0.1em;
     transition: all 0.6s ease;
@@ -86,11 +91,15 @@ defineEmits<{
 
   .poem-preview {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-style: italic;
     color: #444;
     opacity: 0.7;
     line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .miniature-border {

@@ -41,6 +41,8 @@ let loadingTween: gsap.core.Tween | null = null
 
 const { onLoop } = useRenderLoop()
 
+const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
+
 onLoop(({ delta }) => {
   if (!isVisible.value) return
   const material = materialRef.value
@@ -102,9 +104,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <TresGroup v-if="isVisible" ref="groupRef" :position="[3.5, 0, -2]">
+  <TresGroup v-if="isVisible" ref="groupRef" :position="isMobile ? [0, 0, -2] : [3.5, 0, -2]">
     <TresMesh ref="meshRef">
-      <TresTubeGeometry :args="[curve, 128, 0.06, 12, false]" />
+      <TresTubeGeometry :args="[curve, 128, isMobile ? 0.04 : 0.06, 12, false]" />
       <TresShaderMaterial
         ref="materialRef"
         :vertex-shader="fillVert"

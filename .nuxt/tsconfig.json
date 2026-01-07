@@ -110,7 +110,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/dev"
+        "./manifest/meta/25c83454-7b09-4c39-907e-29a7091d1d9e.json"
       ],
       "#components": [
         "./components"
@@ -168,6 +168,6 @@
     "../node_modules/@tresjs/nuxt/node_modules",
     "../node_modules/runtime/server",
     "../node_modules/dist/runtime/server",
-    "dev"
+    "../.output"
   ]
 }

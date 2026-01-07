@@ -22,25 +22,7 @@ const handlePoemSelect = (poem: Poem) => {
 
 const scrollToCollection = () => {
   if (!process.client) return
-  const totalScrollHeight = 16000
-  const duration = 5000
-  const startPosition = window.scrollY
-  const distance = totalScrollHeight + 200 - startPosition
-  let startTime: number | null = null
-  
-  const easeInOutCubic = (t: number): number => {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-  }
-  
-  const animateScroll = (currentTime: number) => {
-    if (startTime === null) startTime = currentTime
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
-    const easedProgress = easeInOutCubic(progress)
-    window.scrollTo(0, startPosition + distance * easedProgress)
-    if (progress < 1) requestAnimationFrame(animateScroll)
-  }
-  requestAnimationFrame(animateScroll)
+  window.scrollTo({ top: 20100, behavior: 'instant' as any })
 }
 
 if (process.client) {
@@ -85,10 +67,10 @@ function setupPinnedTimeline() {
           end: '+=20000', // Increased scroll height for better control
           pin: true,
           scrub: 1,
-          snap: {
-            // Snapping to the middle of the "static" plateaus for each line
-            snapTo: [0.085, 0.185, 0.285, 0.385, 0.485, 0.605, 0.745, 0.885, 0.955],
-            duration: { min: 0.2, max: 0.4 },
+    snap: {
+              // Snapping to the middle of the "static" plateaus for each line
+              snapTo: [0, 0.085, 0.185, 0.285, 0.385, 0.485, 0.605, 0.745, 0.885, 0.955, 1],
+              duration: { min: 0.2, max: 0.4 },
             delay: 0,
             ease: 'power1.inOut'
           },
@@ -454,10 +436,10 @@ onUnmounted(() => {
   position: absolute;
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-size: clamp(1rem, 5vw, 1.6rem);
   color: #fafafa;
   line-height: 1.4;
-  width: 85%;
+  width: 90%;
   max-width: 60ch;
   will-change: transform, opacity, filter;
   opacity: 0;
@@ -480,8 +462,8 @@ onUnmounted(() => {
   &.dead-center { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
   &.heavy { font-weight: 500; letter-spacing: -0.01em; }
   &.hero {
-    font-size: clamp(1.4rem, 6vw, 2.4rem);
-    width: 90%;
+    font-size: clamp(1.2rem, 7vw, 2.2rem);
+    width: 95%;
     max-width: 1200px;
     display: flex;
     flex-direction: column;
@@ -496,6 +478,7 @@ onUnmounted(() => {
     font-size: clamp(1.1rem, 2.6vw, 1.8rem);
     &.center-left { top: 50%; left: 10%; transform: translateY(-50%); text-align: left; }
     &.center-right { top: 50%; right: 10%; transform: translateY(-50%); text-align: right; }
+    &.hero { font-size: clamp(1.4rem, 6vw, 2.4rem); width: 90%; }
   }
 }
 
@@ -632,23 +615,26 @@ onUnmounted(() => {
 
 .collection-nav {
   position: fixed;
-  top: 3.5rem;
-  right: 4rem;
+  top: 2rem;
+  right: 2rem;
   display: flex;
   align-items: center;
   gap: 1.2rem;
   z-index: 100;
   cursor: pointer;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   
   &:hover {
-    transform: translateX(10px);
+    background: rgba(61, 90, 58, 0.12);
     .collection-label { 
       letter-spacing: 0.65em;
       opacity: 1;
+      color: #2d4a2a;
     }
     .nav-logo {
-      transform: rotate(90deg) scale(1.1);
+      filter: sepia(1) hue-rotate(70deg) saturate(2) drop-shadow(0 0 10px rgba(61, 90, 58, 0.8));
     }
   }
 
@@ -656,19 +642,19 @@ onUnmounted(() => {
     width: 28px;
     height: 28px;
     object-fit: contain;
-    transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     filter: sepia(1) hue-rotate(70deg) saturate(1.5);
   }
 
   .collection-label {
     font-family: 'Cormorant Garamond', serif;
     font-size: 0.8rem;
-    font-weight: 300;
+    font-weight: 400;
     letter-spacing: 0.5em;
     color: #3d5a3a;
     opacity: 0.8;
     text-transform: uppercase;
-    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   }
 }
 </style>
